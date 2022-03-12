@@ -1,0 +1,20 @@
+# General Stuff
+*.exe
+*.pdb
+*.obj
+*.o
+
+# Editor Stuff
+.vs/
+.vscode/
+
+# Libs
+dependencies/glad/lib/
+dependencies/stb/lib/
+
+# Test Main Files
+Containers/main.cpp
+Math/main.cpp
+
+# Custom
+.todos
