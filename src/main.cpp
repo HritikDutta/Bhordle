@@ -256,7 +256,7 @@ void OnRender(Application& app)
         constexpr char keyboardLayout[] = "QWERTYUIOP_ASDFGHJKL_ZXCVBNM";
 
         s32 startX = 565;
-        s32 startY = 490;
+        s32 startY = 475;
         
         f32 offsetsX[2] = { 0.75f, 1.75f };
 
@@ -370,7 +370,7 @@ void CreateApp(Application& app)
     app.window.x = 100;
     app.window.y = 100;
     app.window.width  = 1024;
-    app.window.height = 720;
+    app.window.height = 670;
 
     app.data = (void*) &gGameState;
 
