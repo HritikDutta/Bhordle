@@ -70,8 +70,6 @@ void OnInit(Application& app)
 
     for (int i = 0; i < 5; i++)
         state.placedCharacters[wordList[state.wordIndex][i] - 'A']++;
-    
-    std::cout << "Selected Word: " << wordList[state.wordIndex] << std::endl;
 }
 
 void OnUpdate(Application& app)
