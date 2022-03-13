@@ -72,6 +72,7 @@ Vector2 GetRenderedCharSize(char ch, Font& font, f32 size = -1.0f);
 
 void RenderRect(const Rect& rect, const Vector4& color);
 void RenderImage(const Image& image, const Vector3& topLeft, const Vector2& scale = Vector2(1.0f), const Vector4& tint = Vector4(1.0f));
+bool RenderButton(ID id, const Rect& rect, const Vector4& defaultColor = Vector4(0.5f, 0.5f, 0.5f, 1.0f), const Vector4& hoverColor = Vector4(0.75f, 0.75f, 0.75f, 1.0f), const Vector4& pressedColor = Vector4(0.35f, 0.35f, 0.35f, 1.0f));
 
 // (size < 0 would simply use the default font size)
 void RenderText(StringView text, Font& font, const Vector3& topLeft, f32 size = -1.0f, const Vector4& tint = Vector4(1.0f));

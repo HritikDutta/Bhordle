@@ -3,6 +3,7 @@
 #include "core/types.h"
 #include "core/logging.h"
 #include "core/application.h"
+#include "core/input.h"
 #include "math/math.h"
 #include "graphics/shader.h"
 #include "graphics/texture.h"
@@ -448,6 +449,46 @@ void RenderImage(const Image& image, const Vector3& topLeft, const Vector2& scal
     rect.size = Vector2(image.width(), image.height()) * scale;
 
     PushUIQuad(uidata.quadBatch, rect, texCoords, image, tint);
+}
+
+bool RenderButton(ID id, const Rect& rect, const Vector4& defaultColor, const Vector4& hoverColor, const Vector4& pressedColor)
+{
+    bool clicked = false;
+
+    Vector4 color = defaultColor;
+    Vector2 mpos = Input::MousePosition();
+
+    if (mpos.x >= rect.topLeft.x && mpos.x <= rect.topLeft.x + rect.size.x &&
+        mpos.y >= rect.topLeft.y && mpos.y <= rect.topLeft.y + rect.size.y)
+    {
+        uidata.hot = id;
+
+        if (Input::GetMouseButtonDown(MouseButton::LEFT))
+        {
+            clicked = uidata.active != id;
+            uidata.active = id;
+        }
+
+        if (uidata.active != id)
+            color = hoverColor;
+    }
+    else
+    {
+        if (uidata.hot == id)
+            uidata.hot = ImguiInvalidID;
+    }
+
+    if (uidata.active == id)
+    {
+        if (Input::GetMouseButtonDown(MouseButton::LEFT))
+            color = pressedColor;
+        else
+            uidata.active = ImguiInvalidID;
+    }
+
+    RenderRect(rect, color);
+
+    return clicked;
 }
 
 void RenderText(StringView text, Font& font, const Vector3& topLeft, f32 size, const Vector4& tint)

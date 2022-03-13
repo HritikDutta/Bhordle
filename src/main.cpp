@@ -264,7 +264,6 @@ void OnRender(Application& app)
         rect.size = Vector2(35, 55);
         rect.topLeft = Vector3(startX, startY, 0);
 
-        // TODO: These should be buttons        
         s32 offsetIndex = 0;
         for (int i = 0; keyboardLayout[i]; i++)
         {
@@ -277,7 +276,8 @@ void OnRender(Application& app)
 
             {   // Render Background Rect
                 LetterState lstate = state.letterStates[keyboardLayout[i] - 'A'];
-                Imgui::RenderRect(rect, colors[(s32) lstate]);
+                if (Imgui::RenderButton(GenImguiIDWithSecondary(i), rect, colors[(s32) lstate], colors[(s32) lstate] + Vector4(0.25f, 0.25f, 0.25f, 0.0f), colors[(s32) lstate]))
+                    OnEventCheckInput(app, (Key)(keyboardLayout[i] - 'A' + (s32) Key::A));
             }
             
             {

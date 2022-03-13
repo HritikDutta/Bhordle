@@ -57,8 +57,10 @@ inline void InputProcessMouseButton(MouseButton btn, bool pressed)
 
 inline void InputProcessMouseMove(s32 x, s32 y)
 {
-    currentInputState.mouseState.x = x;
-    currentInputState.mouseState.y = y;
+    Application& app = GetActiveApplication();
+
+    currentInputState.mouseState.x = app.window.refWidth * x / app.window.width;
+    currentInputState.mouseState.y = app.window.refHeight * y / app.window.height;
 }
 
 inline void InputProcessMouseWheel(s32 z)
