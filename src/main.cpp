@@ -11,6 +11,11 @@ enum struct LetterState
     CORRECT
 };
 
+namespace FontSizes {
+    constexpr f32 LARGE = 64;
+    constexpr f32 SMALL = 24;
+}
+
 struct GameState
 {
     // Game Settings
@@ -29,8 +34,6 @@ struct GameState
 } gGameState;
 
 constexpr u8 correctWordMask = 0x1F;
-constexpr f32 largeFontSize = 64;
-constexpr f32 smallFontSize = 24;
 
 void OnEventCheckInput(Application& app, Key key)
 {
@@ -55,6 +58,86 @@ void OnEventCheckInput(Application& app, Key key)
             if (state.currentGuessIndex < 6 && state.filled < 5)
                 state.guesses[state.currentGuessIndex][state.filled++] = (char) key;
         }
+
+        if (key == Key::ENTER)
+        {
+            if (state.filled == 5)
+            {
+                bool found = false;
+
+                for (int i = 0; !found && i < wordListSize; i++)
+                {
+                    found = true;
+
+                    for (int s = 0; s < 5; s++)
+                    {
+                        if (state.guesses[state.currentGuessIndex][s] != wordList[i][s])
+                        {
+                            found = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (found)
+                {
+                    s32 charsLeft[26];
+                    PlatformCopyMemory(charsLeft, state.placedCharacters, sizeof(charsLeft));
+
+                    // Check Correctness
+                    for (int i = 0; i < 5; i++)
+                    {
+                        char guessChar = state.guesses[state.currentGuessIndex][i];
+
+                        bool correct = wordList[state.wordIndex][i] == guessChar;
+                        state.correctMasks[state.currentGuessIndex] |= ((s32) correct << i);
+
+                        if (correct)
+                        {
+                            charsLeft[guessChar - 'A']--;
+                            state.letterStates[guessChar - 'A'] = LetterState::CORRECT;
+                        }
+                    }
+
+                    if (state.correctMasks[state.currentGuessIndex] != correctWordMask)
+                    {
+                        // Check for placed
+                        for (int i = 0; i < 5; i++)
+                        {
+                            // Ignore correct guesses
+                            if (state.correctMasks[state.currentGuessIndex] & (1 << i))
+                                continue;
+                            
+                            char guessChar = state.guesses[state.currentGuessIndex][i];
+
+                            bool placed = charsLeft[guessChar - 'A'] > 0;
+                            state.placedMasks[state.currentGuessIndex] |= ((s32) placed << i);
+                            charsLeft[guessChar - 'A']--;
+
+                            // Save state based on priority (1. Correct, 2. Placed, 3. Wrong, 4. Untouched)
+                            if (placed)
+                            {
+                                if (state.letterStates[guessChar - 'A'] != LetterState::CORRECT)
+                                    state.letterStates[guessChar - 'A'] = LetterState::PLACED;
+                            }
+                            else
+                            {
+                                if (state.letterStates[guessChar - 'A'] == LetterState::UNTOUCHED)
+                                    state.letterStates[guessChar - 'A'] = LetterState::WRONG;
+                            }
+
+                        }
+
+                        state.currentGuessIndex++;
+                        state.filled = 0;
+                    }
+                }
+                else
+                {
+                    state.invalidWord = true;
+                }
+            }
+        }
     }
 }
 
@@ -70,92 +153,6 @@ void OnInit(Application& app)
 
     for (int i = 0; i < 5; i++)
         state.placedCharacters[wordList[state.wordIndex][i] - 'A']++;
-}
-
-void OnUpdate(Application& app)
-{
-    GameState& state = *(GameState*) app.data;
-
-    if (Input::GetKeyDown(Key::ENTER))
-    {
-        if (state.filled == 5)
-        {
-            bool found = false;
-
-            for (int i = 0; !found && i < wordListSize; i++)
-            {
-                found = true;
-
-                for (int s = 0; s < 5; s++)
-                {
-                    if (state.guesses[state.currentGuessIndex][s] != wordList[i][s])
-                    {
-                        found = false;
-                        break;
-                    }
-                }
-            }
-
-            if (found)
-            {
-                s32 charsLeft[26];
-                PlatformCopyMemory(charsLeft, state.placedCharacters, sizeof(charsLeft));
-
-                // Check Correctness
-                for (int i = 0; i < 5; i++)
-                {
-                    char guessChar = state.guesses[state.currentGuessIndex][i];
-
-                    bool correct = wordList[state.wordIndex][i] == guessChar;
-                    state.correctMasks[state.currentGuessIndex] |= ((s32) correct << i);
-
-                    if (correct)
-                    {
-                        charsLeft[guessChar - 'A']--;
-                        state.letterStates[guessChar - 'A'] = LetterState::CORRECT;
-                    }
-                }
-
-                if (state.correctMasks[state.currentGuessIndex] != correctWordMask)
-                {
-                    // Check for placed
-                    for (int i = 0; i < 5; i++)
-                    {
-                        // Ignore correct guesses
-                        if (state.correctMasks[state.currentGuessIndex] & (1 << i))
-                            continue;
-                        
-                        char guessChar = state.guesses[state.currentGuessIndex][i];
-
-                        bool placed = charsLeft[guessChar - 'A'] > 0;
-                        state.placedMasks[state.currentGuessIndex] |= ((s32) placed << i);
-                        charsLeft[guessChar - 'A']--;
-
-                        // Save state based on priority (1. Correct, 2. Placed, 3. Wrong, 4. Untouched)
-                        if (placed)
-                        {
-                            if (state.letterStates[guessChar - 'A'] != LetterState::CORRECT)
-                                state.letterStates[guessChar - 'A'] = LetterState::PLACED;
-                        }
-                        else
-                        {
-                            if (state.letterStates[guessChar - 'A'] == LetterState::UNTOUCHED)
-                                state.letterStates[guessChar - 'A'] = LetterState::WRONG;
-                        }
-
-                    }
-
-                    state.currentGuessIndex++;
-                    state.filled = 0;
-                }
-            }
-            else
-            {
-                state.invalidWord = true;
-            }
-
-        }
-    }
 }
 
 void OnRender(Application& app)
@@ -217,13 +214,13 @@ void OnRender(Application& app)
             {
                 char ch = state.guesses[g][i];
 
-                Vector2 size = Imgui::GetRenderedCharSize(ch, state.font, largeFontSize);
+                Vector2 size = Imgui::GetRenderedCharSize(ch, state.font, FontSizes::LARGE);
 
                 Vector3 topLeft = rectTopLeft;
                 topLeft.x += ((rectSize - size.x) / 2);
                 topLeft.y += ((rectSize - size.y) / 2);
                 
-                Imgui::RenderChar(ch, state.font, topLeft, largeFontSize);
+                Imgui::RenderChar(ch, state.font, topLeft, FontSizes::LARGE);
 
                 rectTopLeft.x += rectSize + 10;
             }
@@ -239,13 +236,13 @@ void OnRender(Application& app)
             {
                 char ch = state.guesses[state.currentGuessIndex][i];
 
-                Vector2 size = Imgui::GetRenderedCharSize(ch, state.font, largeFontSize);
+                Vector2 size = Imgui::GetRenderedCharSize(ch, state.font, FontSizes::LARGE);
 
                 Vector3 topLeft = rectTopLeft;
                 topLeft.x += ((rectSize - size.x) / 2);
                 topLeft.y += ((rectSize - size.y) / 2);
                 
-                Imgui::RenderChar(ch, state.font, topLeft, largeFontSize);
+                Imgui::RenderChar(ch, state.font, topLeft, FontSizes::LARGE);
 
                 rectTopLeft.x += rectSize + 10;
             }
@@ -255,7 +252,7 @@ void OnRender(Application& app)
     {   // Render Keyboard
         constexpr char keyboardLayout[] = "QWERTYUIOP_ASDFGHJKL_ZXCVBNM";
 
-        s32 startX = 565;
+        s32 startX = 580;
         s32 startY = 475;
         
         f32 offsetsX[2] = { 0.75f, 1.75f };
@@ -281,16 +278,61 @@ void OnRender(Application& app)
             }
             
             {
-                Vector2 size = Imgui::GetRenderedCharSize(keyboardLayout[i], state.font, smallFontSize);
+                Vector2 size = Imgui::GetRenderedCharSize(keyboardLayout[i], state.font, FontSizes::SMALL);
 
                 Vector3 topLeft = rect.topLeft;
                 topLeft.x += ((rect.size.x - size.x) / 2);
                 topLeft.y += ((rect.size.y - size.y) / 2);
                 
-                Imgui::RenderChar(keyboardLayout[i], state.font, topLeft, smallFontSize);
+                Imgui::RenderChar(keyboardLayout[i], state.font, topLeft, FontSizes::SMALL);
             }
 
             rect.topLeft.x += rect.size.x + 10;
+        }
+
+        {   // Render backspace and enter keys
+            {   // Backspace
+                StringView text = "DEL";
+                Vector2 size = Imgui::GetRenderedTextSize(text, state.font, FontSizes::SMALL);
+
+                Imgui::Rect btnRect = rect;
+
+                {   // Button Background
+                    btnRect.size.x += size.x;
+
+                    if (Imgui::RenderButton(GenImguiID(), btnRect, colors[0], colors[0] + Vector4(0.25f, 0.25f, 0.25f, 0.0f), colors[0]))
+                        OnEventCheckInput(app, Key::BACKSPACE);
+                }
+
+                {   // Button Text
+                    Vector3 topLeft = btnRect.topLeft;
+                    topLeft.x += ((btnRect.size.x - size.x) / 2);
+                    topLeft.y += ((btnRect.size.y - size.y) / 2);
+                    Imgui::RenderText(text, state.font, topLeft, FontSizes::SMALL);
+                }
+            }
+
+            {   // Backspace
+                StringView text = "RET";
+                Vector2 size = Imgui::GetRenderedTextSize(text, state.font, FontSizes::SMALL);
+
+                Imgui::Rect btnRect = rect;
+
+                {   // Button Background
+                    btnRect.size.x += size.x;
+                    btnRect.topLeft.x = startX + offsetsX[offsetIndex - 1] * rect.size.x - btnRect.size.x - 10;
+
+                    if (Imgui::RenderButton(GenImguiID(), btnRect, colors[0], colors[0] + Vector4(0.25f, 0.25f, 0.25f, 0.0f), colors[0]))
+                        OnEventCheckInput(app, Key::ENTER);
+                }
+
+                {   // Button Text
+                    Vector3 topLeft = btnRect.topLeft;
+                    topLeft.x += ((btnRect.size.x - size.x) / 2);
+                    topLeft.y += ((btnRect.size.y - size.y) / 2);
+                    Imgui::RenderText(text, state.font, topLeft, FontSizes::SMALL);
+                }
+            }
         }
     }
 
@@ -300,12 +342,12 @@ void OnRender(Application& app)
         char buffer[256];
         sprintf(buffer, "The word was: %s", wordList[state.wordIndex]);
 
-        Vector2 size = Imgui::GetRenderedTextSize(buffer, state.font, smallFontSize);
+        Vector2 size = Imgui::GetRenderedTextSize(buffer, state.font, FontSizes::SMALL);
         Imgui::Rect rect;
 
         {   // Render Background
             rect.size = size + Vector2(50, 20);
-            rect.topLeft = Vector3(655, 10, 0);
+            rect.topLeft = Vector3((1618 - rect.size.x) / 2, 10, 0);
             Imgui::RenderRect(rect, Vector4(1));
         }
 
@@ -313,7 +355,7 @@ void OnRender(Application& app)
             Vector3 topLeft = rect.topLeft;
             topLeft.x += 25;
             topLeft.y += 10;
-            Imgui::RenderText(buffer, state.font, topLeft, smallFontSize, Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+            Imgui::RenderText(buffer, state.font, topLeft, FontSizes::SMALL, Vector4(0.3f, 0.3f, 0.3f, 1.0f));
         }
     }
 
@@ -322,12 +364,12 @@ void OnRender(Application& app)
     {
         char buffer[] = "Yayy!";
         
-        Vector2 size = Imgui::GetRenderedTextSize(buffer, state.font, smallFontSize);
+        Vector2 size = Imgui::GetRenderedTextSize(buffer, state.font, FontSizes::SMALL);
         Imgui::Rect rect;
 
         {   // Render Background
             rect.size = size + Vector2(50, 20);
-            rect.topLeft = Vector3(740, 10, 0);
+            rect.topLeft = Vector3((1618 - rect.size.x) / 2, 10, 0);
             Imgui::RenderRect(rect, Vector4(1));
         }
 
@@ -335,7 +377,7 @@ void OnRender(Application& app)
             Vector3 topLeft = rect.topLeft;
             topLeft.x += 25;
             topLeft.y += 10;
-            Imgui::RenderText(buffer, state.font, topLeft, smallFontSize, Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+            Imgui::RenderText(buffer, state.font, topLeft, FontSizes::SMALL, Vector4(0.3f, 0.3f, 0.3f, 1.0f));
         }
     }
 
@@ -344,12 +386,12 @@ void OnRender(Application& app)
     {
         char buffer[] = "Not in word list";
         
-        Vector2 size = Imgui::GetRenderedTextSize(buffer, state.font, smallFontSize);
+        Vector2 size = Imgui::GetRenderedTextSize(buffer, state.font, FontSizes::SMALL);
         Imgui::Rect rect;
 
         {   // Render Background
             rect.size = size + Vector2(50, 20);
-            rect.topLeft = Vector3(675, 10, 0);
+            rect.topLeft = Vector3((1618 - rect.size.x) / 2, 10, 0);
             Imgui::RenderRect(rect, Vector4(1));
         }
 
@@ -357,7 +399,7 @@ void OnRender(Application& app)
             Vector3 topLeft = rect.topLeft;
             topLeft.x += 25;
             topLeft.y += 10;
-            Imgui::RenderText(buffer, state.font, topLeft, smallFontSize, Vector4(0.3f, 0.3f, 0.3f, 1.0f));
+            Imgui::RenderText(buffer, state.font, topLeft, FontSizes::SMALL, Vector4(0.3f, 0.3f, 0.3f, 1.0f));
         }
     }
 
@@ -369,12 +411,11 @@ void CreateApp(Application& app)
     app.window.name = "Wordle!";
     app.window.x = 100;
     app.window.y = 100;
-    app.window.width  = 1024;
+    app.window.width  = 1038;
     app.window.height = 670;
 
     app.data = (void*) &gGameState;
 
     app.OnInit = OnInit;
-    app.OnUpdate = OnUpdate;
     app.OnRender = OnRender;
 }
