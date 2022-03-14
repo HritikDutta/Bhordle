@@ -366,7 +366,7 @@ void OnRender(Application& app)
 
 void CreateApp(Application& app)
 {
-    app.window.name = "Bhordle!";
+    app.window.name = "Wordle!";
     app.window.x = 100;
     app.window.y = 100;
     app.window.width  = 1024;
