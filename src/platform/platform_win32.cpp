@@ -216,33 +216,41 @@ LRESULT CALLBACK Win32ProcessMessage(HWND hwnd, u32 msg, WPARAM wParam, LPARAM l
         } break;
 
         case WM_LBUTTONDOWN:
+        case WM_LBUTTONDBLCLK:
         case WM_MBUTTONDOWN:
+        case WM_MBUTTONDBLCLK:
         case WM_RBUTTONDOWN:
+        case WM_RBUTTONDBLCLK:
         case WM_LBUTTONUP:
         case WM_MBUTTONUP:
         case WM_RBUTTONUP:
         {
-            bool pressed = msg == WM_LBUTTONDOWN || msg == WM_MBUTTONDOWN || msg == WM_RBUTTONDOWN;
+            bool pressed = msg == WM_LBUTTONDOWN || msg == WM_LBUTTONDBLCLK ||
+                           msg == WM_MBUTTONDOWN || msg == WM_MBUTTONDBLCLK ||
+                           msg == WM_RBUTTONDOWN || msg == WM_RBUTTONDBLCLK;
             MouseButton btn = MouseButton::NUM_BUTTONS;
 
             switch (msg)
             {
                 case WM_LBUTTONDOWN:
                 case WM_LBUTTONUP:
+                case WM_LBUTTONDBLCLK:
                 {
                     btn = MouseButton::LEFT;
                 } break;
 
-                case WM_RBUTTONDOWN:
-                case WM_RBUTTONUP:
-                {
-                    btn = MouseButton::RIGHT;
-                } break;
-
                 case WM_MBUTTONDOWN:
                 case WM_MBUTTONUP:
+                case WM_MBUTTONDBLCLK:
                 {
                     btn = MouseButton::MIDDLE;
+                } break;
+
+                case WM_RBUTTONDOWN:
+                case WM_RBUTTONUP:
+                case WM_RBUTTONDBLCLK:
+                {
+                    btn = MouseButton::RIGHT;
                 } break;
             }
 

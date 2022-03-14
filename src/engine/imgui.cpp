@@ -468,22 +468,16 @@ bool RenderButton(ID id, const Rect& rect, const Vector4& defaultColor, const Ve
             clicked = uidata.active != id;
             uidata.active = id;
         }
+        
+        if (uidata.active == id && Input::GetMouseButtonUp(MouseButton::LEFT))
+            uidata.active = ImguiInvalidID;
 
-        if (uidata.active != id)
-            color = hoverColor;
+        color = (uidata.active == id) ? pressedColor : hoverColor;
     }
     else
     {
         if (uidata.hot == id)
             uidata.hot = ImguiInvalidID;
-    }
-
-    if (uidata.active == id)
-    {
-        if (Input::GetMouseButtonDown(MouseButton::LEFT))
-            color = pressedColor;
-        else
-            uidata.active = ImguiInvalidID;
     }
 
     RenderRect(rect, color);
