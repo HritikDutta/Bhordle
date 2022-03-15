@@ -36,8 +36,12 @@ cl /c %compile_flags% src/engine/*.cpp %defines% %includes% & ^
 cl /c %compile_flags% src/graphics/*.cpp %defines% %includes% & ^
 cl /c %compile_flags% src/main.cpp %defines% %includes%
 
+rem Resources
+rc resources.rc
+
 rem Link and Make Executable
-link *.obj %objs% %libs% /OUT:wordle.exe %link_flags%
+link *.obj %objs% %libs% *.res /OUT:wordle.exe %link_flags%
 
 rem Delete Intermediate Files
 del *.obj
+del *.res

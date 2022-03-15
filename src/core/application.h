@@ -7,6 +7,7 @@
 struct WindowData
 {
     String name;
+    String iconPath;
     s32 x, y;
     s32 width, height;
     s32 refHeight, refWidth;

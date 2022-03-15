@@ -485,6 +485,7 @@ void OnRender(Application& app)
 void CreateApp(Application& app)
 {
     app.window.name = "Wordle!";
+    app.window.iconPath = "assets/icons/wordle-icon.ico";
     app.window.x = 100;
     app.window.y = 100;
     app.window.width  = 1038;

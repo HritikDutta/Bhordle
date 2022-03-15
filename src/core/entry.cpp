@@ -29,7 +29,8 @@ int main()
     if (!PlatformWindowStartup(pstate,
         app.window.name.cstr(),
         app.window.x, app.window.y,
-        app.window.width, app.window.height))
+        app.window.width, app.window.height,
+        app.window.iconPath.cstr()))
     {
         return 1;
     }

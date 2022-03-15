@@ -19,7 +19,7 @@ static LARGE_INTEGER startTime;
 
 LRESULT CALLBACK Win32ProcessMessage(HWND hwnd, u32 msg, WPARAM wParam, LPARAM lParam);
 
-bool PlatformWindowStartup(PlatformState& pstate, const char* windowName, int x, int y, int width, int height)
+bool PlatformWindowStartup(PlatformState& pstate, const char* windowName, int x, int y, int width, int height, const char* iconPath)
 {
     pstate.internalState = (InternalState*) PlatformAllocate(sizeof(InternalState));
     InternalState& state = *pstate.internalState;
@@ -27,7 +27,7 @@ bool PlatformWindowStartup(PlatformState& pstate, const char* windowName, int x,
     state.hInstance = GetModuleHandleA(0);
 
     // Setup and Register Window Class
-    HICON icon = LoadIcon(state.hInstance, IDI_APPLICATION);
+    HICON icon = (HICON) LoadImageA(state.hInstance, iconPath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
 
     WNDCLASSA wc = {};
     wc.style = CS_DBLCLKS;

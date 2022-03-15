@@ -9,7 +9,7 @@ struct PlatformState
     InternalState* internalState;
 };
 
-bool PlatformWindowStartup(PlatformState& pstate, const char* windowName, int x, int y, int width, int height);
+bool PlatformWindowStartup(PlatformState& pstate, const char* windowName, int x, int y, int width, int height, const char* iconPath);
 void PlatformWindowShutdown(PlatformState& pstate);
 
 bool PlatformPumpMessages();
