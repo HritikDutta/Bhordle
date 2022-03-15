@@ -16,5 +16,8 @@ dependencies/stb/lib/
 Containers/main.cpp
 Math/main.cpp
 
+# Exported Stuff
+export/
+
 # Custom
 .todos
