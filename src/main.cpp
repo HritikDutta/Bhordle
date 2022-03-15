@@ -187,8 +187,8 @@ void OnRender(Application& app)
     const Vector4 colors[] = {
         Vector4(0.5f, 0.5f, 0.5f, 1.0f),
         Vector4(0.2f, 0.2f, 0.2f, 1.0f),
-        Vector4(0.5f, 0.5f, 0.0f, 1.0f),
-        Vector4(0.0f, 0.5f, 0.0f, 1.0f)
+        Vector4(0.88f, 0.66f, 0.0f, 1.0f),
+        Vector4(0.003f, 0.71f, 0.003f, 1.0f)
     };
 
     {   // Render Rects
