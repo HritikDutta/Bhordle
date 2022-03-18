@@ -47,7 +47,7 @@ void ResetGame(GameState& state)
     state.filled = 0;
     state.wordIndex = 0;
 
-    state.wordIndex = wordListSize * Math::Random();
+    state.wordIndex = answersEnd * Math::Random();
 
     for (int i = 0; i < 5; i++)
         state.placedCharacters[wordList[state.wordIndex][i] - 'A']++;
@@ -167,10 +167,7 @@ void OnInit(Application& app)
 
     state.font.Load("assets/fonts/atlas.font.png", "assets/fonts/atlas.font.json");
 
-    state.wordIndex = wordListSize * Math::Random();
-
-    for (int i = 0; i < 5; i++)
-        state.placedCharacters[wordList[state.wordIndex][i] - 'A']++;
+    ResetGame(state);
 }
 
 void OnRender(Application& app)
